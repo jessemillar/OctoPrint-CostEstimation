@@ -2,7 +2,6 @@
 from setuptools import setup
 
 ####################################################################################################
-
 plugin_identifier = "costestimation"
 plugin_package = "octoprint_costestimation"
 plugin_name = "OctoPrint-CostEstimation"
@@ -17,7 +16,6 @@ plugin_additional_data = []
 plugin_additional_packages = []
 plugin_ignored_packages = []
 additional_setup_parameters = {}
-
 ####################################################################################################
 
 try:
