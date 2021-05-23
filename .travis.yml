@@ -1,7 +1,6 @@
 ##
 ## Simple script to build a zip file of the whole repository
 ##
-
 script:
 # debug  - echo 'Hello World'
   - export PLUGIN_VERSION=$(cat setup.py | grep 'plugin_version = "*"' | cut -d '"' -f2)
