@@ -22,12 +22,14 @@ $(function() {
         });
 
         self.showFilamentGroup = ko.pureComputed(function() {
-            var filamentManagerDisabled = self.filamentManager === null || !self.settings.settings.plugins.costestimation.useFilamentManager();
-            var spoolManagerDisabled = self.spoolManager === null || !self.settings.settings.plugins.costestimation.useSpoolManager();
-            return !filamentManagerDisabled && !spoolManagerDisabled;
+            // var filamentManagerDisabled = self.filamentManager === null || !self.settings.settings.plugins.costestimation.useFilamentManager();
+            // var spoolManagerDisabled = self.spoolManager === null || !self.settings.settings.plugins.costestimation.useSpoolManager();
+            // return !filamentManagerDisabled && !spoolManagerDisabled;
+            return self.settings.settings.plugins.costestimation.useFilamentManager() == false && self.settings.settings.plugins.costestimation.useSpoolManager() == false;
         });
 
         self.estimatedCostString = ko.pureComputed(function() {
+
             if (!self.showEstimatedCost()) return "user not logged in";
             if (self.printerState.filename() === undefined) return "no filename";
             if (self.printerState.filament().length == 0) return "no filament from meta";
@@ -41,10 +43,7 @@ $(function() {
             if (self.filamentManager !== null && pluginSettings.useFilamentManager()) {
                 spoolData = self.filamentManager.selectedSpools();
             } else if (self.spoolManager !== null && pluginSettings.useSpoolManager()) {
-                var selectedSpool = self.spoolManager.selectedSpoolForSidebar();
-                if (selectedSpool) {
-                    spoolData = [self.parseSpoolManagerData(self.spoolManager)];
-                }
+                spoolData = self.readSpoolManagerData();
             }
 
             // calculating filament cost
@@ -60,7 +59,7 @@ $(function() {
 
                 var costOfFilament, weightOfFilament, densityOfFilament, diameterOfFilament;
 
-                if (spoolData !== null) {
+                if (spoolData !== null && spoolData[tool] !== null) {
                     costOfFilament = spoolData[tool].cost;
                     weightOfFilament =  spoolData[tool].weight;
                     densityOfFilament = spoolData[tool].profile.density;
@@ -120,27 +119,58 @@ $(function() {
                 var text = gettext("Estimated print cost based on required quantity of filament and print time");
                 element.before("<div id='costestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedCostString'></strong></div>");
             }
-        };
 
-        self.parseSpoolManagerData = function(spoolManager = null) {
-            if (!spoolManager) return null;
-            var selectedSpool = spoolManager.selectedSpoolForSidebar();
+            self.settings.settings.plugins.costestimation.useFilamentManager.subscribe(function(newValue){
+                if (newValue == true){
+                    self.settings.settings.plugins.costestimation.useSpoolManager(false);
+                }
+            });
+            self.settings.settings.plugins.costestimation.useSpoolManager.subscribe(function(newValue){
+                if (newValue == true){
+                    self.settings.settings.plugins.costestimation.useFilamentManager(false);
+                }
+            });
+
+
+
+        };
+        self.onAfterBinding = function(){
+            if (self.filamentManager === null){
+                self.settings.settings.plugins.costestimation.useFilamentManager(false);
+            }
+            if (self.spoolManager === null){
+                self.settings.settings.plugins.costestimation.useSpoolManager(false);
+            }
+        }
+
+        self.readSpoolManagerData = function() {
+            // needed data
+            // costOfFilament = spoolData[tool].cost;
+            // weightOfFilament =  spoolData[tool].weight;
+            // densityOfFilament = spoolData[tool].profile.density;
+            // diameterOfFilament = spoolData[tool].profile.diameter;
+
+            if (self.spoolManager == null || self.settings.settings.plugins.costestimation.useSpoolManager() == false)
+                return null;
+
+            var selectedSpool = self.spoolManager.api_getSelectedSpoolInformations();
             if (!selectedSpool) return null;
-            return {
-                id: selectedSpool.databaseId() || 0,
-                cost: selectedSpool.cost() || 0,
-                name: selectedSpool.displayName() || "",
-                profile: {
-                    id: selectedSpool.databaseId() || 0,
-                    density: selectedSpool.density() || 0,
-                    diameter: selectedSpool.diameter() || 0,
-                    material: selectedSpool.material() || "",
-                    vendor: selectedSpool.vendor() || ""
-                },
-                temp_offset: 0,
-                used: selectedSpool.usedWeight() ? parseInt(selectedSpool.usedWeight(),10) : 0,
-                weight: selectedSpool.totalWeight() ? parseInt(selectedSpool.totalWeight(),10) : 0,
-            };
+            var result = [];
+            for (const spoolInfo of selectedSpool) {
+                var spoolData = null;
+                if (spoolInfo != null) {
+                    spoolData = {
+                        cost: spoolInfo.cost || 0,
+                        profile: {
+                            density: spoolInfo.density || 0,
+                            diameter: spoolInfo.diameter || 0
+                        },
+                        weight: spoolInfo.weight || 0
+                    }
+                }
+                result.push(spoolData)
+            }
+            return result;
         };
     }
 

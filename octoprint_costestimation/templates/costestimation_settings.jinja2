@@ -5,7 +5,7 @@
     <div class="control-group">
         <div class="controls">
             <label class="checkbox">
-                <input type="checkbox" data-bind="checked: $root.settings.settings.plugins.costestimation.useFilamentManager">
+                <input name="filamentTracker" type="checkbox" data-bind="checked: $root.settings.settings.plugins.costestimation.useFilamentManager, enable: $root.filamentManager !== null">
                 {{ _('Use <a target="_blank" href="https://github.com/malnvenshorn/OctoPrint-FilamentManager">Filament Manager Plugin</a>') }}
                 <!-- ko if: $root.filamentManager !== null -->
                 <span class="text-success">{{ _("(installed)") }}</span>
@@ -17,8 +17,8 @@
         </div>
         <div class="controls">
             <label class="checkbox">
-                <input type="checkbox" data-bind="checked: $root.settings.settings.plugins.costestimation.useSpoolManager">
-                {{ _('Use <a target="_blank" href="https://github.com/OllisGit/OctoPrint-SpoolManager">Spool Manager Plugin</a>') }}
+                <input name="filamentTracker" type="checkbox" data-bind="checked: $root.settings.settings.plugins.costestimation.useSpoolManager, enable: $root.spoolManager !== null">
+                {{ _('Use <a target="_blank" href="https://github.com/OllisGit/OctoPrint-SpoolManager">Spool Manager Plugin (V1.4+)</a>') }}
                 <!-- ko if: $root.spoolManager !== null -->
                 <span class="text-success">{{ _("(installed)") }}</span>
                 <!-- /ko -->
@@ -29,7 +29,10 @@
         </div>
     </div>
 
-    <div data-bind="visible: $root.showFilamentGroup">
+    <div data-bind="visible: $root.showFilamentGroup()==false">
+        <h4>Default fallback values, if filament cost are not available from external plugin</h4>
+    </div>
+    <div>
         <div class="control-group">
             <label class="control-label">{{ _('Price') }}</label>
             <div class="controls">
