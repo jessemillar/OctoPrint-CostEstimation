@@ -20,8 +20,18 @@
 
 This OctoPrint plugin displays the estimated print cost for the loaded model. The print cost includes the price for the used filament the maintenance and operating cost for the printer as well as the depreciation of the printer.
 
+HINT: The Cost-Calculation is based on the generated Metadata from OctoPrint. OctoPrint stores such data in the upload folder in the file ```.metadata.json```.
+Look for your file then and you shoul see a analyse section like this:
+![CostEstimation](screenshots/costestimation-metadata.png?raw=true)
+
+If the metadata is not present you will see ```no filament from meta```
+
+To fix this, go to the "Plugin-Settings / Features" and switch "Analyze gcode..." to "always".
+
+See https://github.com/OllisGit/OctoPrint-CostEstimation/issues/9
+
 ## Features
-- Calculation based on the provided filament length
+- Calculation based on the provided filament length (```.../uploads/.metadata.json```)
 - Customizable currency symbol
 - Hide cost if not logged in (optional)
 - Support for multiple extruders
