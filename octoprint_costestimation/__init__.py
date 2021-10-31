@@ -5,15 +5,55 @@ __author__ = "Sven Lohrmann <malnvenshorn@mailbox.org>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (C) 2017 Sven Lohrmann - Released under terms of the AGPLv3 License"
 
+import flask
 import octoprint.plugin
+from flask import request
 
 
 class CostEstimationPlugin(octoprint.plugin.SettingsPlugin,
                            octoprint.plugin.AssetPlugin,
-                           octoprint.plugin.TemplatePlugin):
+                           octoprint.plugin.TemplatePlugin,
+                           octoprint.plugin.BlueprintPlugin):
+
+    def initialize(self):
+        self.costData = None
+
+
+    #######################################################################################   UPDATE JOB
+    @octoprint.plugin.BlueprintPlugin.route("/storeCurrentCosts", methods=["PUT"])
+    def put_storeCurrentCosts(self):
+        jsonData = request.json
+
+        #             var costData = {
+        #                 filename: filename,
+        #                 filepath: filepath,
+        #                 costResult: costResult,
+        #                 filamentCost: filamentCost,
+        #                 electricityCost: electricityCost,
+        #                 printerCost: printerCost,
+        #                 currencySymbol: currencySymbol,
+        #                 currencyFormat: currencyFormat
+        #             }
+        self.costData = jsonData
+
+        return flask.jsonify()
+
+    ######################################################################################### PUBLIC IMPLEMENTATION API
+
+    #             var costData = {
+    #                 filename: filename,
+    #                 filepath: filepath,
+    #                 costResult: costResult,
+    #                 filamentCost: filamentCost,
+    #                 electricityCost: electricityCost,
+    #                 printerCost: printerCost,
+    #                 currencySymbol: currencySymbol,
+    #                 currencyFormat: currencyFormat
+    #             }
+    def api_getCurrentCostsValues(self):
+        return self.costData
 
     # SettingsPlugin
-
     def get_settings_defaults(self):
         return dict(
             weightOfFilament=1000,       # g
@@ -66,7 +106,9 @@ class CostEstimationPlugin(octoprint.plugin.SettingsPlugin,
 
     def get_assets(self):
         return dict(
-            js=["js/costestimation.js"]
+            js=[
+                "js/costestimation.js"
+            ]
         )
 
     # SoftwareUpdate

@@ -8,6 +8,9 @@
 $(function() {
 
     function CostEstimationViewModel(parameters) {
+
+        var PLUGIN_ID = "costestimation";
+
         var self = this;
 
         self.printerState = parameters[0];
@@ -15,6 +18,7 @@ $(function() {
         self.loginState = parameters[2];
         self.filamentManager = parameters[3];
         self.spoolManager = parameters[4];
+        self.filesViewModel = parameters[5];
 
         self.showEstimatedCost = ko.pureComputed(function() {
             return self.settings.settings.plugins.costestimation.requiresLogin() ?
@@ -28,6 +32,7 @@ $(function() {
             return self.settings.settings.plugins.costestimation.useFilamentManager() == false && self.settings.settings.plugins.costestimation.useSpoolManager() == false;
         });
 
+        self.lastCostResult = null;
         self.estimatedCostString = ko.pureComputed(function() {
 
             if (!self.showEstimatedCost()) return "user not logged in";
@@ -46,7 +51,7 @@ $(function() {
                 spoolData = self.readSpoolManagerData();
             }
 
-            // calculating filament cost
+            // - calculating filament cost
             var filamentCost = 0;
             for (var i = 0; i < jobFilament.length; ++i) {
                 var result = /(\d+)/.exec(jobFilament[i].name()); // extract tool id from name
@@ -79,14 +84,14 @@ $(function() {
                 filamentCost += costPerWeight * filamentVolume * densityOfFilament;
             }
 
-            // calculating electricity cost
+            // - calculating electricity cost
             var powerConsumption = parseFloat(pluginSettings.powerConsumption());
             var costOfElectricity = parseFloat(pluginSettings.costOfElectricity());
             var costPerHour = powerConsumption * costOfElectricity;
             var estimatedPrintTime = self.printerState.estimatedPrintTime() / 3600;  // h
             var electricityCost = costPerHour * estimatedPrintTime;
 
-            // calculating printer cost
+            // - calculating printer cost
             var purchasePrice = parseFloat(pluginSettings.priceOfPrinter());
             var lifespan = parseFloat(pluginSettings.lifespanOfPrinter());
             var depreciationPerHour = lifespan > 0 ? purchasePrice / lifespan : 0;
@@ -103,6 +108,28 @@ $(function() {
             }
             if (noSpoolValues == true){
                 costResult += " (no Spool-Values)";
+            }
+
+            var filename = self.printerState.filename();
+            var filepath = self.printerState.filepath();
+
+            var costData = {
+                filename: filename,
+                filepath: filepath,
+                costResult: costResult,
+                filamentCost: filamentCost,
+                electricityCost: electricityCost,
+                printerCost: printerCost,
+                currencySymbol: currencySymbol,
+                currencyFormat: currencyFormat
+            }
+            // send only if the result is changed
+            if (self.lastCostResult != costResult) {
+                // console.error(self.lastCostResult + "  " + costResult);
+                self.lastCostResult = costResult;
+                self.callSendCostsToServer(costData, function (responseData) {
+                    // do nothing
+                });
             }
             return costResult;
         });
@@ -130,10 +157,31 @@ $(function() {
                     self.settings.settings.plugins.costestimation.useFilamentManager(false);
                 }
             });
-
-
-
         };
+
+
+        // self.filesViewModel.getCostsInformation = function(fileItem){
+        //     // if (fileItem.DisplayLayerProgress != null){
+        //     //     return parseInt(fileItem.DisplayLayerProgress.totalLayerCountWithoutOffset) + parseInt(self.settingsViewModel.settings.plugins.DisplayLayerProgress.layerOffset());
+        //     // }
+        //     // console.error(fileItem);
+        //
+        //     return "1.23€";
+        // };
+
+        // startup
+        self.onStartup = function () {
+            // // get orig file-item html and add "Layers:"
+            // $("#files_template_machinecode").text(function(){
+            //     var origFileListHtml = $(this).text();
+            //     // var patchedFileItemHtml = origFileListHtml.replace('formatSize(size)"></span></div>', 'formatSize(size)"></span></div>' +
+            //     //                         '<div class="size" data-bind="visible: ($root.settingsViewModel.settings.plugins.DisplayLayerProgress.showOnFileListView() == true)" >Layers: <span data-bind="text: $root.getLayerInformation($data)"></span></div>');
+            //     var patchedFileItemHtml = origFileListHtml.replace('formatSize(size)"></span></div>', 'formatSize(size)"></span></div>' +
+            //                             '<div class="size" >Costs: <span data-bind="text: $root.getCostsInformation($data)"></span></div>');
+            //     return patchedFileItemHtml;
+            // });
+        };
+
         self.onAfterBinding = function(){
             if (self.filamentManager === null){
                 self.settings.settings.plugins.costestimation.useFilamentManager(false);
@@ -172,13 +220,32 @@ $(function() {
             }
             return result;
         };
+
+        /////////////////////////////////////////////////////////////////////// API-Calls
+        var callCount = 0;
+        self.callSendCostsToServer = function (costData, responseHandler){
+            callCount++;
+            // console.error(callCount);
+            jsonPayload = ko.toJSON(costData);
+
+            $.ajax({
+                //url: API_BASEURL + "plugin/"+PLUGIN_ID+"/loadPrintJobHistory",
+                url: BASEURL + "plugin/" + PLUGIN_ID + "/storeCurrentCosts",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: jsonPayload,
+                type: "PUT"
+            }).done(function( data ){
+                responseHandler();
+            });
+        }
     }
 
     OCTOPRINT_VIEWMODELS.push({
         construct: CostEstimationViewModel,
         dependencies: ["printerStateViewModel", "settingsViewModel",
                        "loginStateViewModel", "filamentManagerViewModel",
-                       "spoolManagerViewModel"],
+                       "spoolManagerViewModel", "filesViewModel"],
         optional: ["filamentManagerViewModel","spoolManagerViewModel"],
         elements: ["#costestimation_string", "#settings_plugin_costestimation"]
     });
