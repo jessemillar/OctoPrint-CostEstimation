@@ -102,12 +102,12 @@ $(function() {
             var estimatedCost = filamentCost + electricityCost + printerCost;
             var currencySymbol = pluginSettings.currency();
             var currencyFormat = pluginSettings.currencyFormat();
-            var costResult = currencyFormat.replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
+            var totalCostsFormatted = currencyFormat.replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
             if (withDefaultSpoolValues == true){
-                costResult += " (with default Spool-Values)";
+                totalCostsFormatted += " (with default Spool-Values)";
             }
             if (noSpoolValues == true){
-                costResult += " (no Spool-Values)";
+                totalCostsFormatted += " (no Spool-Values)";
             }
 
             var filename = self.printerState.filename();
@@ -116,7 +116,8 @@ $(function() {
             var costData = {
                 filename: filename,
                 filepath: filepath,
-                costResult: costResult,
+                totalCosts: estimatedCost,
+                totalCostsFormatted: totalCostsFormatted,
                 filamentCost: filamentCost,
                 electricityCost: electricityCost,
                 printerCost: printerCost,
@@ -125,14 +126,14 @@ $(function() {
                 withDefaultSpoolValues: withDefaultSpoolValues
             }
             // send only if the result is changed
-            if (self.lastCostResult != costResult) {
-                // console.error(self.lastCostResult + "  " + costResult);
-                self.lastCostResult = costResult;
+            if (self.lastCostResult != totalCostsFormatted) {
+                // console.error(self.lastCostResult + "  " + totalCostsFormatted);
+                self.lastCostResult = totalCostsFormatted;
                 self.callSendCostsToServer(costData, function (responseData) {
                     // do nothing
                 });
             }
-            return costResult;
+            return totalCostsFormatted;
         });
 
         self.calculateVolume = function(length, diameter) {
