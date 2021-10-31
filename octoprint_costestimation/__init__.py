@@ -32,7 +32,8 @@ class CostEstimationPlugin(octoprint.plugin.SettingsPlugin,
         #                 electricityCost: electricityCost,
         #                 printerCost: printerCost,
         #                 currencySymbol: currencySymbol,
-        #                 currencyFormat: currencyFormat
+        #                 currencyFormat: currencyFormat,
+        #                 withDefaultSpoolValues: true/false
         #             }
         self.costData = jsonData
 
@@ -48,7 +49,8 @@ class CostEstimationPlugin(octoprint.plugin.SettingsPlugin,
     #                 electricityCost: electricityCost,
     #                 printerCost: printerCost,
     #                 currencySymbol: currencySymbol,
-    #                 currencyFormat: currencyFormat
+    #                 currencyFormat: currencyFormat,
+    #                 withDefaultSpoolValues: true/false
     #             }
     def api_getCurrentCostsValues(self):
         return self.costData

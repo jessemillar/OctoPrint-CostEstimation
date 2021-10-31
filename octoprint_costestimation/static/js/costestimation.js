@@ -121,7 +121,8 @@ $(function() {
                 electricityCost: electricityCost,
                 printerCost: printerCost,
                 currencySymbol: currencySymbol,
-                currencyFormat: currencyFormat
+                currencyFormat: currencyFormat,
+                withDefaultSpoolValues: withDefaultSpoolValues
             }
             // send only if the result is changed
             if (self.lastCostResult != costResult) {
