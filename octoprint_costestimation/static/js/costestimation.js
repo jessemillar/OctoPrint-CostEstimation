@@ -103,7 +103,7 @@ $(function() {
             var estimatedPrice = filamentCost + electricityCost + printerCost;
             var currencySymbol = pluginSettings.currency();
             var currencyFormat = pluginSettings.currencyFormat();
-            var totalCostsFormatted = currencyFormat.replace("%p", estimatedPrice.toFixed(2)).replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
+            var totalCostsFormatted = currencyFormat.replaceAll("%p", estimatedPrice.toFixed(2)).replaceAll("%v", estimatedCost.toFixed(2)).replaceAll("%s", currencySymbol);
             if (withDefaultSpoolValues == true){
                 totalCostsFormatted += " (with default Spool-Values)";
             }
