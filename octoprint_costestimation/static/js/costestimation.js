@@ -156,7 +156,7 @@ $(function() {
 
                 name = gettext("Price");
                 text = gettext("Estimated retail price based on required quantity of filament, print time, and additional costs");
-                element.before("<div id='costestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedPriceString'></strong></div>");
+                element.before("<div id='priceestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedPriceString'></strong></div>");
             }
 
             self.settings.settings.plugins.costestimation.useFilamentManager.subscribe(function(newValue){
@@ -259,6 +259,6 @@ $(function() {
                        "loginStateViewModel", "filamentManagerViewModel",
                        "spoolManagerViewModel", "filesViewModel"],
         optional: ["filamentManagerViewModel","spoolManagerViewModel"],
-        elements: ["#costestimation_string", "#settings_plugin_costestimation"]
+        elements: ["#costestimation_string", "#priceestimation_string", "#settings_plugin_costestimation"]
     });
 });
