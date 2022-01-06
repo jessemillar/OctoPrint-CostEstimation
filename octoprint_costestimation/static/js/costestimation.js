@@ -104,7 +104,7 @@ $(function() {
             var currencySymbol = pluginSettings.currency();
             var currencyFormat = pluginSettings.currencyFormat();
             var totalCostsFormatted = currencyFormat.replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
-            var totalPriceFormatted = currencyFormat.replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
+            var totalPriceFormatted = currencyFormat.replace("%v", estimatedPrice.toFixed(2)).replace("%s", currencySymbol);
             if (withDefaultSpoolValues == true){
                 totalCostsFormatted += " (with default Spool-Values)";
             }
@@ -119,7 +119,9 @@ $(function() {
                 filename: filename,
                 filepath: filepath,
                 totalCosts: estimatedCost,
+                totalPrice: estimatedPrice,
                 totalCostsFormatted: totalCostsFormatted,
+                totalPriceFormatted: totalPriceFormatted,
                 filamentCost: filamentCost,
                 electricityCost: electricityCost,
                 printerCost: printerCost,
