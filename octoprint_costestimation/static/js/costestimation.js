@@ -99,10 +99,12 @@ $(function() {
             var printerCost = (depreciationPerHour + maintenancePerHour) * estimatedPrintTime;
 
             // assembling string
-            var estimatedCost = filamentCost + electricityCost + printerCost;
+            var estimatedCost = filamentCost + electricityCost;
+            var estimatedPrice = filamentCost + electricityCost + printerCost;
             var currencySymbol = pluginSettings.currency();
             var currencyFormat = pluginSettings.currencyFormat();
             var totalCostsFormatted = currencyFormat.replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
+            var totalPriceFormatted = currencyFormat.replace("%v", estimatedCost.toFixed(2)).replace("%s", currencySymbol);
             if (withDefaultSpoolValues == true){
                 totalCostsFormatted += " (with default Spool-Values)";
             }
@@ -147,6 +149,10 @@ $(function() {
                 var name = gettext("Cost");
                 var text = gettext("Estimated print cost based on required quantity of filament and print time");
                 element.before("<div id='costestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedCostString'></strong></div>");
+
+                name = gettext("Price");
+                text = gettext("Estimated retail price based on required quantity of filament, print time, and additional costs");
+                element.before("<div id='costestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedPriceString'></strong></div>");
             }
 
             self.settings.settings.plugins.costestimation.useFilamentManager.subscribe(function(newValue){
