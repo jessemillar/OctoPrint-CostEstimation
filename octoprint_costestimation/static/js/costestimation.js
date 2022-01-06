@@ -150,13 +150,11 @@ $(function() {
                 var text = gettext("Estimated print cost based on required quantity of filament and print time");
                 element.before("<div id='costestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedCostString'></strong></div>");
 
-                if (estimatedCostString == "no filament from meta") {
-                    estimatedPriceString = estimatedCostString
+                if (estimatedCostString != "no filament from meta" || estimatedCostString != "user not logged in" || estimatedCostString != "no filename") {
+                    name = gettext("Price");
+                    text = gettext("Estimated retail price based on required quantity of filament, print time, and additional costs");
+                    element.before("<div id='priceestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedPriceString'></strong></div>");
                 }
-
-                name = gettext("Price");
-                text = gettext("Estimated retail price based on required quantity of filament, print time, and additional costs");
-                element.before("<div id='priceestimation_string' data-bind='visible: showEstimatedCost()'><span title='" + text + "'>" + name + "</span>: <strong data-bind='text: estimatedPriceString'></strong></div>");
             }
 
             self.settings.settings.plugins.costestimation.useFilamentManager.subscribe(function(newValue){
